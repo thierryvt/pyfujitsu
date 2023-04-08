@@ -10,6 +10,9 @@ class OperationMode(enum.IntEnum):
     FAN = 5
     HEAT = 6
 
+    def __str__(self):
+        return str(self._value_)
+
 
 class FanSpeed(enum.IntEnum):
     QUIET = 0
@@ -18,10 +21,16 @@ class FanSpeed(enum.IntEnum):
     HIGH = 3
     AUTO = 4
 
+    def __str__(self):
+        return str(self._value_)
+
 
 class BooleanProperty(enum.IntEnum):
     OFF = 0
     ON = 1
+
+    def __str__(self):
+        return str(self._value_)
 
 
 class VerticalSwingPosition(enum.IntEnum):
@@ -31,6 +40,9 @@ class VerticalSwingPosition(enum.IntEnum):
     POS4 = 4
     POS5 = 5
     DOWN = 6
+
+    def __str__(self):
+        return str(self._value_)
 
 
 FAN_SPEED_DICT = {
@@ -42,10 +54,7 @@ FAN_SPEED_DICT = {
 }
 
 
-
-
-
-class ACProperties(enum.StrEnum):
+class ACProperties(enum.Enum):
     OPERATION_MODE = 'operation_mode'
     FAN_SPEED = 'fan_speed'
     REFRESH_READ_PROPERTIES = 'get_prop'
@@ -55,7 +64,10 @@ class ACProperties(enum.StrEnum):
     POWERFUL_MODE = 'powerful_mode'
     ECONOMY_MODE = 'economy_mode'
 
-    #below are readonly properties
+    # below are readonly properties
     DISPLAY_TEMPERATURE = 'display_temperature'
     VERTICAL_SWING_POSITION = 'af_vertical_num_dir'
     DEVICE_NAME = 'device_name'
+
+    def __str__(self):
+        return self._value_

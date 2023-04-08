@@ -40,7 +40,7 @@ class Api:
             self._API_GET_ACCESS_TOKEN_URL = "https://user-field.ayla.com.cn/users/sign_in.json"
             API_BASE_URL = "https://ads-field.ayla.com.cn/apiv1/"
         else:
-            self._SIGNIN_BODY = "{\r\n    \"user\": {\r\n        \"email\": \"%s\",\r\n        \"application\": {\r\n            \"app_id\": \"CJIOSP-id\",\r\n            \"app_secret\": \"CJIOSP-Vb8MQL_lFiYQ7DKjN0eCFXznKZE\"\r\n        },\r\n        \"password\": \"%s\"\r\n    }\r\n}"
+            self._SIGNIN_BODY = '{"user": {"email": "%s", "application": {"app_id": "CJIOSP-id", "app_secret": "CJIOSP-Vb8MQL_lFiYQ7DKjN0eCFXznKZE"},"password": "%s" }}'
             self._API_GET_ACCESS_TOKEN_URL = "https://user-field.aylanetworks.com/users/sign_in.json"
             API_BASE_URL = "https://ads-field.aylanetworks.com/apiv1/"
 
@@ -88,7 +88,7 @@ class Api:
         if not self._check_token_validity(access_token):
             access_token = self._authenticate()
 
-        response = self._call_api("get", self._API_SET_PROPERTY_URL.format(DSN=dsn, property=propertyCode),
+        response = self._call_api("get", self._API_GET_PROPERTY_URL.format(DSN=dsn, property=propertyCode),
                                   access_token=access_token)
         ## Pay Attention the response is a HTTP request response object 
         #  and by doing .json you would get a List
@@ -104,7 +104,7 @@ class Api:
         return True
 
     def _authenticate(self):
-
+        body = self._SIGNIN_BODY % (self.username, self.password)
         response = self._call_api("POST",
                                   self._API_GET_ACCESS_TOKEN_URL,
                                   json=self._SIGNIN_BODY % (self.username, self.password),

@@ -18,10 +18,10 @@ class SplitAC:
         self._api.set_device_property(self._dsn, propertyCode, value)
 
     def _get_device_property(self, propertyCode: ACProperties):
-        return self._api.get_device_properties(self._dsn, propertyCode)
+        return self._api.get_device_property(self._dsn, propertyCode)
 
     def _get_device_property_value(self, propertyCode: ACProperties):
-        return self._get_device_property(propertyCode)['value']
+        return self._get_device_property(propertyCode).json()['property']['value']
 
     # special case, props like display temperature do not update automatically
     # sending this property triggers it to update
@@ -73,9 +73,9 @@ class SplitAC:
         self._set_device_property(ACProperties.VERTICAL_SWING, BooleanProperty.OFF)
 
     # TODO detect if C or F is being used but I'm lazy AF and Celsius is best unit anyway
-    # display temperature is x100 and has an offset of 5400 for... reasons.
+    # display temperature is x100 and has an offset of 5000 for... reasons.
     def get_display_temperature(self):
-        return (int(self._get_device_property_value(ACProperties.DISPLAY_TEMPERATURE)) - 5400) / 100
+        return (int(self._get_device_property_value(ACProperties.DISPLAY_TEMPERATURE)) - 5000) / 100
 
     # and if you thought that setting the temperature was the same? Hah. No.
     # when using C you need to set the target temperature x10
