@@ -1,17 +1,18 @@
-from .api import Api as api
-from properties import *
+from Properties import *
 
 
 # version 0.9.2.7
 
-class splitAC:
+class SplitAC:
     def __init__(self, dsn, api):
+        if not api:
+            raise Exception('Missing api')
+
+        if not dsn or not isinstance(dsn, str):
+            raise ValueError("dsn must be a non-empty string")
+
         self._dsn = dsn
         self._api = api
-        self._properties = self._api.get_device_properties(self._dsn)
-
-    def refresh_properties(self):
-        self._properties = self._api.get_device_properties(self._dsn)
 
     def _set_device_property(self, propertyCode: ACProperties, value):
         self._api.set_device_property(self._dsn, propertyCode, value)
@@ -24,11 +25,13 @@ class splitAC:
 
     # special case, props like display temperature do not update automatically
     # sending this property triggers it to update
-    # calling refresh_properties technically achieves the same because it pushes ALL the properties, including this one
     def refresh_readonly_properties(self):
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
 
     def turn_on(self, mode: OperationMode):
+        if not isinstance(mode, OperationMode):
+            raise Exception(f'Invalid operationMode value: {mode}')
+
         self._set_device_property(ACProperties.OPERATION_MODE, mode)
 
     def turn_off(self):
@@ -47,13 +50,17 @@ class splitAC:
         self._set_device_property(ACProperties.POWERFUL_MODE, BooleanProperty.OFF)
 
     def set_fan_speed(self, speed: FanSpeed):
-        print(speed)
+        if not isinstance(speed, FanSpeed):
+            raise Exception(f'Invalid fan speed value: {speed}')
+
         self._set_device_property(ACProperties.FAN_SPEED, speed)
 
     def get_fan_speed_desc(self):
         return FAN_SPEED_DICT[self._get_device_property_value(ACProperties.FAN_SPEED)]
 
     def set_vertical_direction(self, direction: VerticalSwingPosition):
+        if not isinstance(direction, VerticalSwingPosition):
+            raise Exception(f'Invalid fan direction value: {direction}')
         self._set_device_property(ACProperties.VERTICAL_DIRECTION, direction)
 
     def get_vertical_direction(self):
@@ -74,7 +81,7 @@ class splitAC:
     # when using C you need to set the target temperature x10
     def set_target_temperature(self, targetTemperature: float):
         if targetTemperature < 16.0 or targetTemperature > 30.0:
-            raise Exception('Invalid targetTemperature, must be 16 <= target <= 30')
+            raise Exception(f'Invalid targetTemperature: {targetTemperature}. Value must be 16 <= target <= 30')
 
         actualTarget = int(targetTemperature * 10)
         self._set_device_property(ACProperties.ADJUST_TEMPERATURE, actualTarget)
