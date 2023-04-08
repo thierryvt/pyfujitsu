@@ -45,15 +45,6 @@ class VerticalSwingPosition(enum.IntEnum):
         return str(self._value_)
 
 
-FAN_SPEED_DICT = {
-    0: 'Quiet',
-    1: 'Low',
-    2: 'Medium',
-    3: 'High',
-    4: 'Auto'
-}
-
-
 class ACProperties(enum.Enum):
     OPERATION_MODE = 'operation_mode'
     FAN_SPEED = 'fan_speed'

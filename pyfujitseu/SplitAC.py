@@ -15,13 +15,22 @@ class SplitAC:
         self._api = api
 
     def _set_device_property(self, propertyCode: ACProperties, value):
+        if not isinstance(propertyCode, ACProperties):
+            raise Exception(f"Invalid propertyCode: {propertyCode}")
+
         self._api.set_device_property(self._dsn, propertyCode, value)
 
     def _get_device_property(self, propertyCode: ACProperties):
+        if not isinstance(propertyCode, ACProperties):
+            raise Exception(f"Invalid propertyCode: {propertyCode}")
+
         return self._api.get_device_property(self._dsn, propertyCode)
 
     def _get_device_property_value(self, propertyCode: ACProperties):
-        return self._get_device_property(propertyCode).json()['property']['value']
+        if not isinstance(propertyCode, ACProperties):
+            raise Exception(f"Invalid propertyCode: {propertyCode}")
+
+        return self._get_device_property(propertyCode)['property']['value']
 
     # special case, props like display temperature do not update automatically
     # sending this property triggers it to update
@@ -55,8 +64,8 @@ class SplitAC:
 
         self._set_device_property(ACProperties.FAN_SPEED, speed)
 
-    def get_fan_speed_desc(self):
-        return FAN_SPEED_DICT[self._get_device_property_value(ACProperties.FAN_SPEED)]
+    def get_fan_speed(self):
+        return self._get_device_property_value(ACProperties.FAN_SPEED)
 
     def set_vertical_direction(self, direction: VerticalSwingPosition):
         if not isinstance(direction, VerticalSwingPosition):
@@ -78,7 +87,7 @@ class SplitAC:
         return (int(self._get_device_property_value(ACProperties.DISPLAY_TEMPERATURE)) - 5000) / 100
 
     # and if you thought that setting the temperature was the same? Hah. No.
-    # when using C you need to set the target temperature x10
+    # you need to set the target temperature x10
     def set_target_temperature(self, targetTemperature: float):
         if targetTemperature < 16.0 or targetTemperature > 30.0:
             raise Exception(f'Invalid targetTemperature: {targetTemperature}. Value must be 16 <= target <= 30')
