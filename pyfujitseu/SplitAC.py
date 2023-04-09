@@ -1,7 +1,7 @@
 from Properties import *
 
 
-# version 0.9.2.7
+# version 91.9.2.7
 
 class SplitAC:
     def __init__(self, dsn, api):
@@ -13,18 +13,26 @@ class SplitAC:
 
         self._dsn = dsn
         self._api = api
+        self._cache = {}
 
     def _set_device_property(self, propertyCode: ACProperties, value):
         if not isinstance(propertyCode, ACProperties):
             raise Exception(f"Invalid propertyCode: {propertyCode}")
 
         self._api.set_device_property(self._dsn, propertyCode, value)
+        del self._cache[propertyCode]
+
 
     def _get_device_property(self, propertyCode: ACProperties):
         if not isinstance(propertyCode, ACProperties):
             raise Exception(f"Invalid propertyCode: {propertyCode}")
 
-        return self._api.get_device_property(self._dsn, propertyCode)
+        if propertyCode in self._cache:
+            return self._cache[propertyCode]
+
+        result = self._api.get_device_property(self._dsn, propertyCode)
+        self._cache[propertyCode] = result
+        return result
 
     def _get_device_property_value(self, propertyCode: ACProperties):
         if not isinstance(propertyCode, ACProperties):
@@ -36,15 +44,23 @@ class SplitAC:
     # sending this property triggers it to update
     def refresh_readonly_properties(self):
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
+        self._cache.clear()
+
+    def refresh_properties(self):
+        self._cache.clear()
 
     def get_device_name(self):
         return self._get_device_property_value(ACProperties.DEVICE_NAME)
 
-    def turn_on(self, mode: OperationMode):
-        if not isinstance(mode, OperationMode):
-            raise Exception(f'Invalid operationMode value: {mode}')
+    def turn_on(self):
+        datapoints = self._api.get_device_property_history(self._dsn, ACProperties.OPERATION_MODE)
+        ## Get the latest setting before turn off
+        for datapoint in reversed(datapoints):
+            if(datapoint['datapoint']['value'] != 0):
+                last_operation_mode = int(datapoint['datapoint']['value'])
+                break
 
-        self._set_device_property(ACProperties.OPERATION_MODE, mode)
+        self.set_operation_mode(last_operation_mode)
 
     def turn_off(self):
         self._set_device_property(ACProperties.OPERATION_MODE, OperationMode.OFF)
@@ -52,20 +68,23 @@ class SplitAC:
     def get_operating_mode(self):
         return VALUE_TO_OPERATION_MODE[self._get_device_property_value(ACProperties.OPERATION_MODE)]
 
-    def set_economy_mode_on(self):
-        self._set_device_property(ACProperties.ECONOMY_MODE, BooleanProperty.ON)
+    def set_operation_mode(self, mode: OperationMode):
+        if not isinstance(mode, OperationMode):
+            raise Exception(f'Invalid operationMode value: {mode}')
+        self._set_device_property(ACProperties.OPERATION_MODE, mode)
 
-    def set_economy_mode_off(self):
-        self._set_device_property(ACProperties.ECONOMY_MODE, BooleanProperty.OFF)
+    def set_economy_mode(self, mode: BooleanProperty):
+        if not isinstance(mode, BooleanProperty):
+            raise Exception(f'Invalid mode value: {mode}')
+        self._set_device_property(ACProperties.ECONOMY_MODE, mode)
 
     def get_economy_mode(self):
         return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.ECONOMY_MODE)]
 
-    def set_powerful_mode_on(self):
-        self._set_device_property(ACProperties.POWERFUL_MODE, BooleanProperty.ON)
-
-    def set_powerful_mode_off(self):
-        self._set_device_property(ACProperties.POWERFUL_MODE, BooleanProperty.OFF)
+    def set_powerful_mode(self, mode: BooleanProperty):
+        if not isinstance(mode, BooleanProperty):
+            raise Exception(f'Invalid mode value: {mode}')
+        self._set_device_property(ACProperties.POWERFUL_MODE, mode)
 
     def get_powerful_mode(self):
         return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.POWERFUL_MODE)]
@@ -73,7 +92,6 @@ class SplitAC:
     def set_fan_speed(self, speed: FanSpeed):
         if not isinstance(speed, FanSpeed):
             raise Exception(f'Invalid fan speed value: {speed}')
-
         self._set_device_property(ACProperties.FAN_SPEED, speed)
 
     def get_fan_speed(self):
@@ -87,11 +105,10 @@ class SplitAC:
     def get_vertical_direction(self):
         return VALUE_TO_VERTICAL_POSITION[self._get_device_property_value(ACProperties.VERTICAL_SWING_POSITION)]
 
-    def set_vertical_swing_on(self):
-        self._set_device_property(ACProperties.VERTICAL_SWING, BooleanProperty.ON)
-
-    def set_vertical_swing_off(self):
-        self._set_device_property(ACProperties.VERTICAL_SWING, BooleanProperty.OFF)
+    def set_vertical_swing(self, mode: BooleanProperty):
+        if not isinstance(mode, BooleanProperty):
+            raise Exception(f'Invalid mode value: {mode}')
+        self._set_device_property(ACProperties.VERTICAL_SWING, mode)
 
     def get_vertical_swing(self):
         return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.VERTICAL_SWING)]
@@ -109,3 +126,6 @@ class SplitAC:
 
         actualTarget = int(targetTemperature * 10)
         self._set_device_property(ACProperties.ADJUST_TEMPERATURE, actualTarget)
+
+    def get_target_temperature(self):
+        return int(self._get_device_property_value(ACProperties.ADJUST_TEMPERATURE)) / 10

@@ -9,7 +9,7 @@ HEADER_CONTENT_TYPE = "Content-Type"
 HEADER_VALUE_CONTENT_TYPE = "application/json"
 HEADER_AUTHORIZATION = "Authorization"
 
-# version 0.9.2.7
+# version 91.9.2.7
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class Api:
 
         self._API_GET_PROPERTIES_URL = API_BASE_URL + "dsns/{DSN}/properties.json"
         self._API_GET_PROPERTY_URL = API_BASE_URL + "dsns/{DSN}/properties/{property}.json"
-        self._API_SET_PROPERTIES_URL = API_BASE_URL + "dsns/{DSN}/properties/{property}/datapoints.json"
+        self._API_SET_PROPERTY_URL = API_BASE_URL + "dsns/{DSN}/properties/{property}/datapoints.json"
         self._API_GET_DEVICES_URL = API_BASE_URL + "devices.json"
 
         self._ACCESS_TOKEN_FILE = tokenpath
@@ -78,7 +78,7 @@ class Api:
         if not self._check_token_validity(access_token):
             access_token = self._authenticate()
 
-        response = self._call_api("post", self._API_SET_PROPERTIES_URL.format(DSN=dsn, property=propertyCode),
+        response = self._call_api("post", self._API_SET_PROPERTY_URL.format(DSN=dsn, property=propertyCode),
                                   propertyValue=value, access_token=access_token)
 
         return response
@@ -92,6 +92,16 @@ class Api:
                                   access_token=access_token)
 
         return response.json()
+
+    def get_device_property_history(self, dsn, propertyCode: ACProperties):
+        access_token = self._read_token()
+        if not self._check_token_validity(access_token):
+            access_token = self._authenticate()
+
+        response = self._call_api("get", self._API_SET_PROPERTY_URL.format(DSN=dsn, property=propertyCode), access_token=access_token)
+        ## Pay Attention the response is a HTTP request response object
+        #  and by doing .json you would get a List
+        return response
 
     def _check_token_validity(self, access_token=None):
         if not access_token:
