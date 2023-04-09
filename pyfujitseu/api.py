@@ -51,7 +51,7 @@ class Api:
 
         self._ACCESS_TOKEN_FILE = tokenpath
 
-    def _get_devices(self, access_token=None):
+    def get_devices(self, access_token=None):
         if not self._check_token_validity(access_token):
             ## Token invalid requesting authentication
             access_token = self._authenticate()
@@ -59,7 +59,7 @@ class Api:
         return response.json()
 
     def get_devices_dsn(self, access_token=None):
-        devices = self._get_devices()
+        devices = self.get_devices()
         devices_dsn = []
         for device in devices:
             devices_dsn.append(device['device']['dsn'])

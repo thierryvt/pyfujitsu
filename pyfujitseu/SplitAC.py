@@ -37,6 +37,9 @@ class SplitAC:
     def refresh_readonly_properties(self):
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
 
+    def get_device_name(self):
+        return self._get_device_property_value(ACProperties.DEVICE_NAME)
+
     def turn_on(self, mode: OperationMode):
         if not isinstance(mode, OperationMode):
             raise Exception(f'Invalid operationMode value: {mode}')
