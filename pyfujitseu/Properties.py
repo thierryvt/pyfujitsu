@@ -14,6 +14,17 @@ class OperationMode(enum.IntEnum):
         return str(self._value_)
 
 
+VALUE_TO_OPERATION_MODE = {
+    0: 'OFF',
+    1: 'ON',
+    2: 'AUTO',
+    3: 'COOL',
+    4: 'DRY',
+    5: 'FAN',
+    6: 'HEAT'
+}
+
+
 class FanSpeed(enum.IntEnum):
     QUIET = 0
     LOW = 1
@@ -24,6 +35,14 @@ class FanSpeed(enum.IntEnum):
     def __str__(self):
         return str(self._value_)
 
+VALUE_TO_FAN_SPEED = {
+    0: 'QUIET',
+    1: 'LOW',
+    2: 'MEDIUM',
+    3: 'HIGH',
+    4: 'AUTO'
+}
+
 
 class BooleanProperty(enum.IntEnum):
     OFF = 0
@@ -33,16 +52,32 @@ class BooleanProperty(enum.IntEnum):
         return str(self._value_)
 
 
+VALUE_TO_BOOLEAN = {
+    0: 'OFF',
+    1: 'ON'
+}
+
+
 class VerticalSwingPosition(enum.IntEnum):
-    UP = 1
-    POS2 = 2
-    POS3 = 3
-    POS4 = 4
-    POS5 = 5
-    DOWN = 6
+    HIGHEST = 1
+    HIGH = 2
+    CENTER_HIGH = 3
+    CENTER_LOW = 4
+    LOW = 5
+    LOWEST = 6
 
     def __str__(self):
         return str(self._value_)
+
+
+VALUE_TO_VERTICAL_POSITION = {
+    1: 'HIGHEST',
+    2: 'HIGH',
+    3: 'CENTER_HIGH',
+    4: 'CENTER_LOW',
+    5: 'LOW',
+    6: 'LOWEST'
+}
 
 
 class ACProperties(enum.Enum):

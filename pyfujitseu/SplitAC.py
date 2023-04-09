@@ -49,17 +49,26 @@ class SplitAC:
     def turn_off(self):
         self._set_device_property(ACProperties.OPERATION_MODE, OperationMode.OFF)
 
+    def get_operating_mode(self):
+        return VALUE_TO_OPERATION_MODE[self._get_device_property_value(ACProperties.OPERATION_MODE)]
+
     def set_economy_mode_on(self):
         self._set_device_property(ACProperties.ECONOMY_MODE, BooleanProperty.ON)
 
     def set_economy_mode_off(self):
         self._set_device_property(ACProperties.ECONOMY_MODE, BooleanProperty.OFF)
 
+    def get_economy_mode(self):
+        return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.ECONOMY_MODE)]
+
     def set_powerful_mode_on(self):
         self._set_device_property(ACProperties.POWERFUL_MODE, BooleanProperty.ON)
 
     def set_powerful_mode_off(self):
         self._set_device_property(ACProperties.POWERFUL_MODE, BooleanProperty.OFF)
+
+    def get_powerful_mode(self):
+        return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.POWERFUL_MODE)]
 
     def set_fan_speed(self, speed: FanSpeed):
         if not isinstance(speed, FanSpeed):
@@ -68,7 +77,7 @@ class SplitAC:
         self._set_device_property(ACProperties.FAN_SPEED, speed)
 
     def get_fan_speed(self):
-        return self._get_device_property_value(ACProperties.FAN_SPEED)
+        return VALUE_TO_FAN_SPEED[self._get_device_property_value(ACProperties.FAN_SPEED)]
 
     def set_vertical_direction(self, direction: VerticalSwingPosition):
         if not isinstance(direction, VerticalSwingPosition):
@@ -76,13 +85,16 @@ class SplitAC:
         self._set_device_property(ACProperties.VERTICAL_DIRECTION, direction)
 
     def get_vertical_direction(self):
-        return self._get_device_property_value(ACProperties.VERTICAL_SWING_POSITION)
+        return VALUE_TO_VERTICAL_POSITION[self._get_device_property_value(ACProperties.VERTICAL_SWING_POSITION)]
 
     def set_vertical_swing_on(self):
         self._set_device_property(ACProperties.VERTICAL_SWING, BooleanProperty.ON)
 
     def set_vertical_swing_off(self):
         self._set_device_property(ACProperties.VERTICAL_SWING, BooleanProperty.OFF)
+
+    def get_vertical_swing(self):
+        return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.VERTICAL_SWING)]
 
     # TODO detect if C or F is being used but I'm lazy AF and Celsius is best unit anyway
     # display temperature is x100 and has an offset of 5000 for... reasons.
