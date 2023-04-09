@@ -14,14 +14,27 @@ class OperationMode(enum.IntEnum):
         return str(self._value_)
 
 
+class OperationModeDescriptors(enum.Enum):
+    OFF = 'OFF'
+    ON = 'ON'
+    AUTO = 'AUTO'
+    COOL = 'COOL'
+    DRY = 'DRY'
+    FAN = 'FAN'
+    HEAT = 'HEAT'
+
+    def __str__(self):
+        return self._value_
+
+
 VALUE_TO_OPERATION_MODE = {
-    0: 'OFF',
-    1: 'ON',
-    2: 'AUTO',
-    3: 'COOL',
-    4: 'DRY',
-    5: 'FAN',
-    6: 'HEAT'
+    0: OperationModeDescriptors.OFF,
+    1: OperationModeDescriptors.ON,
+    2: OperationModeDescriptors.AUTO,
+    3: OperationModeDescriptors.COOL,
+    4: OperationModeDescriptors.DRY,
+    5: OperationModeDescriptors.FAN,
+    6: OperationModeDescriptors.HEAT
 }
 
 
@@ -35,12 +48,24 @@ class FanSpeed(enum.IntEnum):
     def __str__(self):
         return str(self._value_)
 
+
+class FanSpeedDescriptors(enum.Enum):
+    QUIET = 'QUIET'
+    LOW = 'LOW'
+    MEDIUM = 'MEDIUM'
+    HIGH = 'HIGH'
+    AUTO = 'AUTO'
+
+    def __str__(self):
+        return self._value_
+
+
 VALUE_TO_FAN_SPEED = {
-    0: 'QUIET',
-    1: 'LOW',
-    2: 'MEDIUM',
-    3: 'HIGH',
-    4: 'AUTO'
+    0: FanSpeedDescriptors.QUIET,
+    1: FanSpeedDescriptors.LOW,
+    2: FanSpeedDescriptors.MEDIUM,
+    3: FanSpeedDescriptors.HIGH,
+    4: FanSpeedDescriptors.AUTO
 }
 
 
@@ -52,9 +77,17 @@ class BooleanProperty(enum.IntEnum):
         return str(self._value_)
 
 
+class BooleanDescriptors(enum.Enum):
+    ON = 'ON'
+    OFF = 'OFF'
+
+    def __str__(self):
+        return self._value_
+
+
 VALUE_TO_BOOLEAN = {
-    0: 'OFF',
-    1: 'ON'
+    0: BooleanDescriptors.OFF,
+    1: BooleanDescriptors.ON
 }
 
 
@@ -69,14 +102,25 @@ class VerticalSwingPosition(enum.IntEnum):
     def __str__(self):
         return str(self._value_)
 
+class VerticalPositionDescriptors(enum.Enum):
+    HIGHEST = 'HIGHEST'
+    HIGH = 'HIGH'
+    CENTER_HIGH = 'CENTER_HIGH'
+    CENTER_LOW = 'CENTER_LOW'
+    LOW = 'LOW'
+    LOWEST = 'LOWEST'
+
+    def __str__(self):
+        return self._value_
+
 
 VALUE_TO_VERTICAL_POSITION = {
-    1: 'HIGHEST',
-    2: 'HIGH',
-    3: 'CENTER_HIGH',
-    4: 'CENTER_LOW',
-    5: 'LOW',
-    6: 'LOWEST'
+    1: VerticalPositionDescriptors.HIGHEST,
+    2: VerticalPositionDescriptors.HIGH,
+    3: VerticalPositionDescriptors.CENTER_HIGH,
+    4: VerticalPositionDescriptors.CENTER_LOW,
+    5: VerticalPositionDescriptors.LOW,
+    6: VerticalPositionDescriptors.LOWEST
 }
 
 
