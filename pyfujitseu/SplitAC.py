@@ -42,14 +42,9 @@ class SplitAC:
         return self._get_device_property(propertyCode)['property']['value']
 
     def refresh_properties(self):
-        # spawn a background thread to update all the properties as it contains a blocking wait and I hate asynchronous bullshit
-        refresh_thread = threading.Thread(target=self._refresh_properties_internal())
-        refresh_thread.start()
-
-    def _refresh_properties_internal(self):
         self._cache.clear()
         self.refresh_readonly_properties()
-        # synchronized sleep, gotta wait for the update to propagate.
+        # synchronized sleep, block that mainthread. HA will wrap this in an asynchronous thingy anyway.
         time.sleep(3)
         properties = self._api.get_device_properties(self._dsn)
         for property in properties:
