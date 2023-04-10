@@ -1,4 +1,6 @@
 from Properties import *
+import time
+import threading
 
 
 # version 91.9.2.7
@@ -22,7 +24,6 @@ class SplitAC:
         self._api.set_device_property(self._dsn, propertyCode, value)
         del self._cache[propertyCode]
 
-
     def _get_device_property(self, propertyCode: ACProperties):
         if not isinstance(propertyCode, ACProperties):
             raise Exception(f"Invalid propertyCode: {propertyCode}")
@@ -40,23 +41,40 @@ class SplitAC:
 
         return self._get_device_property(propertyCode)['property']['value']
 
+    def refresh_properties(self):
+        # spawn a background thread to update all the properties as it contains a blocking wait and I hate asynchronous bullshit
+        refresh_thread = threading.Thread(target=self._refresh_properties_internal())
+        refresh_thread.start()
+
+    def _refresh_properties_internal(self):
+        self._cache.clear()
+        self.refresh_readonly_properties()
+        # synchronized sleep, gotta wait for the update to propagate.
+        time.sleep(3)
+        properties = self._api.get_device_properties(self._dsn)
+        for property in properties:
+            try:
+                name = property['property']['name']
+                value = property['property']['value']
+                propertyCode = ACProperties(name)
+                self._cache[propertyCode] = value
+            except ValueError:
+                pass
+
     # special case, props like display temperature do not update automatically
-    # sending this property triggers it to update
+    # sending this property triggers it to update those values
+    # note: it takes a couple seconds for this update to propagate so it might not refresh immediately
     def refresh_readonly_properties(self):
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
-        self._cache.clear()
-
-    def refresh_properties(self):
-        self._cache.clear()
 
     def get_device_name(self):
         return self._get_device_property_value(ACProperties.DEVICE_NAME)
 
     def turn_on(self):
         datapoints = self._api.get_device_property_history(self._dsn, ACProperties.OPERATION_MODE)
-        ## Get the latest setting before turn off
+        # Get the last operation_mode that was not 'off'
         for datapoint in reversed(datapoints):
-            if(datapoint['datapoint']['value'] != 0):
+            if datapoint['datapoint']['value'] != OperationMode.OFF:
                 last_operation_mode = int(datapoint['datapoint']['value'])
                 break
 
