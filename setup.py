@@ -4,16 +4,15 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pyfujitsu",
-    version="91.9.6",
-    author="Mehdi Modarressi",
-    author_email="Luckposht@gmail.com",
-    maintainer="@xerxes87",
+    name="pyfgl",
+    version="1.0.0",
+    author="Thierry VT, Mehdi Modarressi",
+    author_email="",
     description="Python library to control Fujitsu General Airconditioners on AylaNetworks IoT platform",
-    long_description=long_description,
-    # long_description_content_type="text/markdown",
-    url="https://github.com/Mmodarre/pyfujitsu",
-    packages=setuptools.find_packages(),
+    long_description="Python library to control Fujitsu General Airconditioners on AylaNetworks IoT platform",
+    url="https://github.com/thierryvt/pyfujitsu",
+    license="MIT License",
+    packages=['pyfgl'],
     install_requires=['requests', 'certifi', 'chardet', 'idna', 'urllib3'],
     classifiers=[
         "Programming Language :: Python :: 3",

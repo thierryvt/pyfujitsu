@@ -1,6 +1,5 @@
 from Properties import *
 import time
-import threading
 
 
 # version 91.9.2.7
