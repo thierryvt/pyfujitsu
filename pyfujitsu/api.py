@@ -13,7 +13,6 @@ HEADER_AUTHORIZATION = "Authorization"
 
 _LOGGER = logging.getLogger(__name__)
 
-
 def _api_headers(access_token=None):
     headers = {
         HEADER_CONTENT_TYPE: HEADER_VALUE_CONTENT_TYPE
