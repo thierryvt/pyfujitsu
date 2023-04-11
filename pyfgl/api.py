@@ -3,13 +3,13 @@ import requests
 import time
 import os
 import json
-from Properties import ACProperties
+from constants import ACProperties
 
 HEADER_CONTENT_TYPE = "Content-Type"
 HEADER_VALUE_CONTENT_TYPE = "application/json"
 HEADER_AUTHORIZATION = "Authorization"
 
-# version 91.9.2.7
+# version 1.0.1
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 import enum
 
+# version 1.0.1
 
 class OperationMode(enum.IntEnum):
     OFF = 0

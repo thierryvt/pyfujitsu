@@ -1,8 +1,8 @@
-from Properties import *
+from constants import *
 import time
 
 
-# version 91.9.2.7
+# version 1.0.1
 
 class SplitAC:
     def __init__(self, dsn, api):
