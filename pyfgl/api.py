@@ -3,7 +3,7 @@ import requests
 import time
 import os
 import json
-from constants import ACProperties
+from .constants import ACProperties
 
 HEADER_CONTENT_TYPE = "Content-Type"
 HEADER_VALUE_CONTENT_TYPE = "application/json"
