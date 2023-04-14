@@ -1,6 +1,5 @@
 import enum
 
-
 # version 1.0.1
 
 class OperationMode(enum.IntEnum):
@@ -103,7 +102,6 @@ class VerticalSwingPosition(enum.IntEnum):
 
     def __str__(self):
         return str(self._value_)
-
 
 class VerticalPositionDescriptors(enum.Enum):
     HIGHEST = 'HIGHEST'
