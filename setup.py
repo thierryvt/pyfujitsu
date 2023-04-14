@@ -12,7 +12,7 @@ setuptools.setup(
     long_description="Python library to control Fujitsu General Airconditioners on AylaNetworks IoT platform",
     url="https://github.com/thierryvt/pyfujitsu",
     license="MIT License",
-    packages=['custom_components/pyfgl'],
+    packages=['pyfgl'],
     install_requires=['requests', 'certifi', 'chardet', 'idna', 'urllib3'],
     classifiers=[
         "Programming Language :: Python :: 3",
