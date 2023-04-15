@@ -53,9 +53,8 @@ class SplitAC:
         for property in properties:
             try:
                 name = property['property']['name']
-                value = property['property']['value']
                 propertyCode = ACProperties(name)
-                self._cache[propertyCode] = value
+                self._cache[propertyCode] = property
             except ValueError:
                 pass
 
