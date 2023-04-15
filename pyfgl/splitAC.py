@@ -21,7 +21,8 @@ class SplitAC:
             raise Exception(f"Invalid propertyCode: {propertyCode}")
 
         self._api.set_device_property(self._dsn, propertyCode, value)
-        del self._cache[propertyCode]
+        if propertyCode in self._cache:
+            del self._cache[propertyCode]
         self._get_device_property(propertyCode)
 
     def _get_device_property(self, propertyCode: ACProperties):
