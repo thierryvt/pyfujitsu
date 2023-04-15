@@ -22,6 +22,7 @@ class SplitAC:
 
         self._api.set_device_property(self._dsn, propertyCode, value)
         del self._cache[propertyCode]
+        self._get_device_property(propertyCode)
 
     def _get_device_property(self, propertyCode: ACProperties):
         if not isinstance(propertyCode, ACProperties):
@@ -38,11 +39,13 @@ class SplitAC:
         if not isinstance(propertyCode, ACProperties):
             raise Exception(f"Invalid propertyCode: {propertyCode}")
 
-        return self._get_device_property(propertyCode)['property']['value']
+        # return self._get_device_property(propertyCode)['property']['value']
+        return self._cache[propertyCode]['property']['value']
 
     def refresh_properties(self):
         self._cache.clear()
-        self.refresh_readonly_properties()
+        # refresh read-only properties like the display_temperature
+        self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
         # synchronized sleep, block that mainthread. HA will wrap this in an asynchronous thingy anyway.
         time.sleep(3)
         properties = self._api.get_device_properties(self._dsn)
@@ -54,12 +57,6 @@ class SplitAC:
                 self._cache[propertyCode] = value
             except ValueError:
                 pass
-
-    # special case, props like display temperature do not update automatically
-    # sending this property triggers it to update those values
-    # note: it takes a couple seconds for this update to propagate so it might not refresh immediately
-    def refresh_readonly_properties(self):
-        self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
 
     def get_device_name(self):
         return self._get_device_property_value(ACProperties.DEVICE_NAME)
