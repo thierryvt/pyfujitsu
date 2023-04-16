@@ -112,7 +112,7 @@ class SplitAC:
         self._set_device_property(ACProperties.VERTICAL_DIRECTION, direction)
 
     def get_vertical_direction(self):
-        return VALUE_TO_VERTICAL_POSITION[self._get_device_property_value(ACProperties.VERTICAL_SWING_POSITION)]
+        return VALUE_TO_VERTICAL_POSITION[self._get_device_property_value(ACProperties.VERTICAL_DIRECTION)]
 
     def set_vertical_swing(self, mode: BooleanProperty):
         if not isinstance(mode, BooleanProperty):

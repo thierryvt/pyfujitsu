@@ -137,6 +137,7 @@ class ACProperties(enum.Enum):
 
     # below are readonly properties
     DISPLAY_TEMPERATURE = 'display_temperature'
+    # Unclear what this does, seems to somewhat correlate to af_vertical_direction but not entirely
     VERTICAL_SWING_POSITION = 'af_vertical_num_dir'
     DEVICE_NAME = 'device_name'
 
