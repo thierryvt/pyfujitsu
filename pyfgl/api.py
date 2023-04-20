@@ -13,6 +13,7 @@ HEADER_AUTHORIZATION = "Authorization"
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def _api_headers(access_token=None):
     headers = {
         HEADER_CONTENT_TYPE: HEADER_VALUE_CONTENT_TYPE
@@ -52,7 +53,6 @@ class Api:
 
     def get_devices(self, access_token=None):
         if not self._check_token_validity(access_token):
-            ## Token invalid requesting authentication
             access_token = self._authenticate()
         response = self._call_api("get", self._API_GET_DEVICES_URL, access_token=access_token)
         return response.json()
@@ -97,7 +97,8 @@ class Api:
         if not self._check_token_validity(access_token):
             access_token = self._authenticate()
 
-        response = self._call_api("get", self._API_SET_PROPERTY_URL.format(DSN=dsn, property=propertyCode), access_token=access_token)
+        response = self._call_api("get", self._API_SET_PROPERTY_URL.format(DSN=dsn, property=propertyCode),
+                                  access_token=access_token)
         ## Pay Attention the response is a HTTP request response object
         #  and by doing .json you would get a List
         return response

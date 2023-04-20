@@ -1,5 +1,4 @@
 from .constants import *
-import time
 
 
 # version 1.0.1
@@ -16,40 +15,37 @@ class SplitAC:
         self._api = api
         self._cache = {}
 
-    def _set_device_property(self, propertyCode: ACProperties, value):
-        if not isinstance(propertyCode, ACProperties):
-            raise Exception(f"Invalid propertyCode: {propertyCode}")
+    def _set_device_property(self, property_code: ACProperties, value):
+        if not isinstance(property_code, ACProperties):
+            raise Exception(f"Invalid propertyCode: {property_code}")
 
-        self._api.set_device_property(self._dsn, propertyCode, value)
-        if propertyCode in self._cache:
-            del self._cache[propertyCode]
-        self._get_device_property(propertyCode)
+        self._api.set_device_property(self._dsn, property_code, value)
+        self._get_device_property(property_code)
 
-    def _get_device_property(self, propertyCode: ACProperties):
-        if not isinstance(propertyCode, ACProperties):
-            raise Exception(f"Invalid propertyCode: {propertyCode}")
+    def _get_device_property(self, property_code: ACProperties):
+        if not isinstance(property_code, ACProperties):
+            raise Exception(f"Invalid propertyCode: {property_code}")
 
-        if propertyCode in self._cache:
-            return self._cache[propertyCode]
-
-        result = self._api.get_device_property(self._dsn, propertyCode)
-        self._cache[propertyCode] = result
+        result = self._api.get_device_property(self._dsn, property_code)
+        self._cache[property_code] = result
         return result
 
-    def _get_device_property_value(self, propertyCode: ACProperties):
-        if not isinstance(propertyCode, ACProperties):
-            raise Exception(f"Invalid propertyCode: {propertyCode}")
+    def _get_device_property_value(self, property_code: ACProperties):
+        if not isinstance(property_code, ACProperties):
+            raise Exception(f"Invalid propertyCode: {property_code}")
 
         # return self._get_device_property(propertyCode)['property']['value']
-        return self._cache[propertyCode]['property']['value']
+        if property_code in self._cache:
+            return self._cache[property_code]['property']['value']
+        else:
+            return 'N/A'
 
     def refresh_properties(self):
-        self._cache.clear()
         # refresh read-only properties like the display_temperature
+        # this takes a second or 2 though so odds are the properties won't refresh before the GET fires
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
-        # synchronized sleep, block that mainthread. HA will wrap this in an asynchronous thingy anyway.
-        time.sleep(3)
         properties = self._api.get_device_properties(self._dsn)
+        self._cache.clear()
         for property in properties:
             try:
                 name = property['property']['name']
@@ -64,9 +60,10 @@ class SplitAC:
     def turn_on(self):
         datapoints = self._api.get_device_property_history(self._dsn, ACProperties.OPERATION_MODE)
         # Get the last operation_mode that was not 'off'
+        last_operation_mode = OperationMode.AUTO
         for datapoint in reversed(datapoints):
             if datapoint['datapoint']['value'] != OperationMode.OFF:
-                last_operation_mode = int(datapoint['datapoint']['value'])
+                last_operation_mode = VALUE_TO_OPERATION_MODE[datapoint['datapoint']['value']]
                 break
 
         self.set_operation_mode(last_operation_mode)
@@ -129,12 +126,12 @@ class SplitAC:
 
     # and if you thought that setting the temperature was the same? Hah. No.
     # you need to set the target temperature x10
-    def set_target_temperature(self, targetTemperature: float):
-        if targetTemperature < 16.0 or targetTemperature > 30.0:
-            raise Exception(f'Invalid targetTemperature: {targetTemperature}. Value must be 16 <= target <= 30')
+    def set_target_temperature(self, target_temperature: float):
+        if target_temperature < 16.0 or target_temperature > 30.0:
+            raise Exception(f'Invalid targetTemperature: {target_temperature}. Value must be 16 <= target <= 30')
 
-        actualTarget = int(targetTemperature * 10)
-        self._set_device_property(ACProperties.ADJUST_TEMPERATURE, actualTarget)
+        actual_target = int(target_temperature * 10)
+        self._set_device_property(ACProperties.ADJUST_TEMPERATURE, actual_target)
 
     def get_target_temperature(self):
         return int(self._get_device_property_value(ACProperties.ADJUST_TEMPERATURE)) / 10
