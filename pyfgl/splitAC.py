@@ -1,7 +1,7 @@
 from .constants import *
 
 
-# version 1.0.1
+# version 1.0.2
 
 class SplitAC:
     def __init__(self, dsn, api):

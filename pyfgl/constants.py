@@ -1,7 +1,7 @@
 import enum
 
 
-# version 1.0.1
+# version 1.0.2
 
 class OperationMode(enum.IntEnum):
     OFF = 0
