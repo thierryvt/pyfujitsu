@@ -99,8 +99,8 @@ class Api:
 
         response = self._call_api("get", self._API_SET_PROPERTY_URL.format(DSN=dsn, property=propertyCode),
                                   access_token=access_token)
-        ## Pay Attention the response is a HTTP request response object
-        #  and by doing .json you would get a List
+        # Pay Attention the response is a HTTP request response object
+        # and by doing .json you would get a List
         return response
 
     def _check_token_validity(self, access_token=None):

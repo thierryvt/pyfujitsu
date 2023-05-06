@@ -14,48 +14,50 @@ class SplitAC:
         self._dsn = dsn
         self._api = api
         self._cache = {}
+        self._min_temp = 16.0
+        self._max_temp = 30.0
 
     def _set_device_property(self, property_code: ACProperties, value):
         if not isinstance(property_code, ACProperties):
             raise Exception(f"Invalid propertyCode: {property_code}")
 
         self._api.set_device_property(self._dsn, property_code, value)
-        self._get_device_property(property_code)
+        self._cache[property_code] = value
 
-    def _get_device_property(self, property_code: ACProperties):
+    def _get_raw_device_property_from_api(self, property_code: ACProperties):
         if not isinstance(property_code, ACProperties):
             raise Exception(f"Invalid propertyCode: {property_code}")
 
-        result = self._api.get_device_property(self._dsn, property_code)
-        self._cache[property_code] = result
-        return result
+        return self._api.get_device_property(self._dsn, property_code)
 
-    def _get_device_property_value(self, property_code: ACProperties):
+    def _get_cached_device_property(self, property_code: ACProperties):
         if not isinstance(property_code, ACProperties):
             raise Exception(f"Invalid propertyCode: {property_code}")
 
-        # return self._get_device_property(propertyCode)['property']['value']
         if property_code in self._cache:
-            return self._cache[property_code]['property']['value']
+            return self._cache[property_code]
         else:
             return 'N/A'
 
     def refresh_properties(self):
-        # refresh read-only properties like the display_temperature
-        # this takes a second or 2 though so odds are the properties won't refresh before the GET fires
+        # refresh read-only properties like the display_temperature, takes a second or 2 so might not update in time
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
         properties = self._api.get_device_properties(self._dsn)
-        self._cache.clear()
         for property in properties:
             try:
                 name = property['property']['name']
-                propertyCode = ACProperties(name)
-                self._cache[propertyCode] = property
+                value = property['property']['value']
+                property_code = ACProperties(name)
+                # this property comes back as 0 after the AC has been off for a while. If that's the case ignore it and keep using the last known cache value.
+                if property_code == ACProperties.ADJUST_TEMPERATURE and property_code in self._cache and (value < self._min_temp or value > self._max_temp):
+                    continue
+
+                self._cache[property_code] = value
             except ValueError:
                 pass
 
     def get_device_name(self):
-        return self._get_device_property_value(ACProperties.DEVICE_NAME)
+        return self._get_cached_device_property(ACProperties.DEVICE_NAME)
 
     def turn_on(self):
         datapoints = self._api.get_device_property_history(self._dsn, ACProperties.OPERATION_MODE)
@@ -72,7 +74,7 @@ class SplitAC:
         self._set_device_property(ACProperties.OPERATION_MODE, OperationMode.OFF)
 
     def get_operating_mode(self):
-        return VALUE_TO_OPERATION_MODE[self._get_device_property_value(ACProperties.OPERATION_MODE)]
+        return VALUE_TO_OPERATION_MODE[self._get_cached_device_property(ACProperties.OPERATION_MODE)]
 
     def set_operation_mode(self, mode: OperationMode):
         if not isinstance(mode, OperationMode):
@@ -85,7 +87,7 @@ class SplitAC:
         self._set_device_property(ACProperties.ECONOMY_MODE, mode)
 
     def get_economy_mode(self):
-        return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.ECONOMY_MODE)]
+        return VALUE_TO_BOOLEAN[self._get_cached_device_property(ACProperties.ECONOMY_MODE)]
 
     def set_powerful_mode(self, mode: BooleanProperty):
         if not isinstance(mode, BooleanProperty):
@@ -93,7 +95,7 @@ class SplitAC:
         self._set_device_property(ACProperties.POWERFUL_MODE, mode)
 
     def get_powerful_mode(self):
-        return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.POWERFUL_MODE)]
+        return VALUE_TO_BOOLEAN[self._get_cached_device_property(ACProperties.POWERFUL_MODE)]
 
     def set_fan_speed(self, speed: FanSpeed):
         if not isinstance(speed, FanSpeed):
@@ -101,7 +103,7 @@ class SplitAC:
         self._set_device_property(ACProperties.FAN_SPEED, speed)
 
     def get_fan_speed(self):
-        return VALUE_TO_FAN_SPEED[self._get_device_property_value(ACProperties.FAN_SPEED)]
+        return VALUE_TO_FAN_SPEED[self._get_cached_device_property(ACProperties.FAN_SPEED)]
 
     def set_vertical_direction(self, direction: VerticalSwingPosition):
         if not isinstance(direction, VerticalSwingPosition):
@@ -109,7 +111,7 @@ class SplitAC:
         self._set_device_property(ACProperties.VERTICAL_DIRECTION, direction)
 
     def get_vertical_direction(self):
-        return VALUE_TO_VERTICAL_POSITION[self._get_device_property_value(ACProperties.VERTICAL_DIRECTION)]
+        return VALUE_TO_VERTICAL_POSITION[self._get_cached_device_property(ACProperties.VERTICAL_DIRECTION)]
 
     def set_vertical_swing(self, mode: BooleanProperty):
         if not isinstance(mode, BooleanProperty):
@@ -117,21 +119,21 @@ class SplitAC:
         self._set_device_property(ACProperties.VERTICAL_SWING, mode)
 
     def get_vertical_swing(self):
-        return VALUE_TO_BOOLEAN[self._get_device_property_value(ACProperties.VERTICAL_SWING)]
+        return VALUE_TO_BOOLEAN[self._get_cached_device_property(ACProperties.VERTICAL_SWING)]
 
     # TODO detect if C or F is being used but I'm lazy AF and Celsius is best unit anyway
     # display temperature is x100 and has an offset of 5000 for... reasons.
     def get_display_temperature(self):
-        return (int(self._get_device_property_value(ACProperties.DISPLAY_TEMPERATURE)) - 5000) / 100
+        return (int(self._get_cached_device_property(ACProperties.DISPLAY_TEMPERATURE)) - 5000) / 100
 
     # and if you thought that setting the temperature was the same? Hah. No.
     # you need to set the target temperature x10
     def set_target_temperature(self, target_temperature: float):
-        if target_temperature < 16.0 or target_temperature > 30.0:
-            raise Exception(f'Invalid targetTemperature: {target_temperature}. Value must be 16 <= target <= 30')
+        if target_temperature < self._min_temp or target_temperature > self._max_temp:
+            raise Exception(f'Invalid targetTemperature: {target_temperature}. Value must be {self._min_temp} <= target <= {self._max_temp}')
 
         actual_target = int(target_temperature * 10)
         self._set_device_property(ACProperties.ADJUST_TEMPERATURE, actual_target)
 
     def get_target_temperature(self):
-        return int(self._get_device_property_value(ACProperties.ADJUST_TEMPERATURE)) / 10
+        return int(self._get_cached_device_property(ACProperties.ADJUST_TEMPERATURE)) / 10
