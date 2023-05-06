@@ -1,7 +1,7 @@
 from .constants import *
 
 
-# version 1.0.2
+# version 1.0.3
 
 class SplitAC:
     def __init__(self, dsn, api):
@@ -43,13 +43,16 @@ class SplitAC:
         # refresh read-only properties like the display_temperature, takes a second or 2 so might not update in time
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
         properties = self._api.get_device_properties(self._dsn)
+        # adjust_temperature values are returned as a x10 value
+        min_temp_raw = self._min_temp * 10
+        max_temp_raw = self._max_temp * 10
         for property in properties:
             try:
                 name = property['property']['name']
                 value = property['property']['value']
                 property_code = ACProperties(name)
                 # this property comes back as 0 after the AC has been off for a while. If that's the case ignore it and keep using the last known cache value.
-                if property_code == ACProperties.ADJUST_TEMPERATURE and property_code in self._cache and (value < self._min_temp or value > self._max_temp):
+                if property_code == ACProperties.ADJUST_TEMPERATURE and property_code in self._cache and (value < min_temp_raw or value > max_temp_raw):
                     continue
 
                 self._cache[property_code] = value
