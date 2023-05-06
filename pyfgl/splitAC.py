@@ -1,7 +1,7 @@
 from .constants import *
 
 
-# version 1.0.3
+# version 1.0.4
 
 class SplitAC:
     def __init__(self, dsn, api):
@@ -51,26 +51,38 @@ class SplitAC:
                 name = property['property']['name']
                 value = property['property']['value']
                 property_code = ACProperties(name)
-                # this property comes back as 0 after the AC has been off for a while. If that's the case ignore it and keep using the last known cache value.
-                if property_code == ACProperties.ADJUST_TEMPERATURE and property_code in self._cache and (value < min_temp_raw or value > max_temp_raw):
-                    continue
+                # this property comes back as 0 after the AC has been off for a while.
+                # either ignore it if it's already in the cache, otherwise try to determine what the last known value was
+                if property_code == ACProperties.ADJUST_TEMPERATURE and (value < min_temp_raw or value > max_temp_raw):
+                    if property_code in self._cache:
+                        continue
+                    else:
+                        value = self._get_last_known_value_for_property_not_equal_to_or_else_default(ACProperties.ADJUST_TEMPERATURE, 0, 0)
 
                 self._cache[property_code] = value
             except ValueError:
                 pass
 
+    # finds the most recent known value of a property that is not equal to the given value
+    # If no such value can be found the default_value is returned
+    def _get_last_known_value_for_property_not_equal_to_or_else_default(self, property_code: ACProperties, value, default_value):
+        if not isinstance(property_code, ACProperties):
+            raise Exception(f"Invalid propertyCode: {property_code}")
+
+        datapoints = self._api.get_device_property_history(self._dsn, property_code)
+        last_value = default_value
+        for datapoint in reversed(datapoints.json()):
+            if datapoint['datapoint']['value'] != value:
+                last_value = datapoint['datapoint']['value']
+                break
+        return last_value
+
     def get_device_name(self):
         return self._get_cached_device_property(ACProperties.DEVICE_NAME)
 
     def turn_on(self):
-        datapoints = self._api.get_device_property_history(self._dsn, ACProperties.OPERATION_MODE)
-        # Get the last operation_mode that was not 'off'
-        last_operation_mode = OperationMode.AUTO
-        for datapoint in reversed(datapoints):
-            if datapoint['datapoint']['value'] != OperationMode.OFF:
-                last_operation_mode = VALUE_TO_OPERATION_MODE[datapoint['datapoint']['value']]
-                break
-
+        raw = self._get_last_known_value_for_property_not_equal_to_or_else_default(ACProperties.OPERATION_MODE, OperationMode.OFF, OperationMode.AUTO)
+        last_operation_mode = VALUE_TO_OPERATION_MODE[raw]
         self.set_operation_mode(last_operation_mode)
 
     def turn_off(self):
