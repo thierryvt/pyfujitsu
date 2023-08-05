@@ -124,6 +124,7 @@ class SplitAC:
         if not isinstance(direction, VerticalSwingPosition):
             raise Exception(f'Invalid fan direction value: {direction}')
         self._set_device_property(ACProperties.VERTICAL_DIRECTION, direction)
+        self.set_vertical_swing(BooleanProperty.OFF)
 
     def get_vertical_direction(self):
         return VALUE_TO_VERTICAL_POSITION[self._get_cached_device_property(ACProperties.VERTICAL_DIRECTION)]
