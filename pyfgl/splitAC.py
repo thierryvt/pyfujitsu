@@ -1,5 +1,5 @@
 from .constants import *
-
+from datetime import datetime, timedelta
 
 # version 1.0.4
 
@@ -16,6 +16,7 @@ class SplitAC:
         self._cache = {}
         self._min_temp = 16.0
         self._max_temp = 30.0
+        self._last_update = datetime.now()
 
     def _set_device_property(self, property_code: ACProperties, value):
         if not isinstance(property_code, ACProperties):
@@ -40,9 +41,16 @@ class SplitAC:
             return 'N/A'
 
     def refresh_properties(self):
+        current_time = datetime.now()
+        if current_time - self._last_update < timedelta(minutes=10):
+            return
+
         # refresh read-only properties like the display_temperature, takes a second or 2 so might not update in time
         self._set_device_property(ACProperties.REFRESH_READ_PROPERTIES, BooleanProperty.ON)
         properties = self._api.get_device_properties(self._dsn)
+
+        self._last_update = current_time
+
         # adjust_temperature values are returned as a x10 value
         min_temp_raw = self._min_temp * 10
         max_temp_raw = self._max_temp * 10
