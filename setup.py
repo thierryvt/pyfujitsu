@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyfgl",
-    version="1.0.4",
+    version="1.0.5",
     author="Thierry VT, Mehdi Modarressi",
     author_email="",
     description="Python library to control Fujitsu General Airconditioners on AylaNetworks IoT platform",

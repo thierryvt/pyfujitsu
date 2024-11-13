@@ -1,7 +1,7 @@
 from .constants import *
 from datetime import datetime, timedelta
 
-# version 1.0.4
+# version 1.0.5
 
 class SplitAC:
     def __init__(self, dsn, api):
