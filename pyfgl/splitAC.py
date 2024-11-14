@@ -16,7 +16,7 @@ class SplitAC:
         self._cache = {}
         self._min_temp = 16.0
         self._max_temp = 30.0
-        self._last_update = datetime.now()
+        self._last_update = datetime.now() - timedelta(minutes=15)
 
     def _set_device_property(self, property_code: ACProperties, value):
         if not isinstance(property_code, ACProperties):
